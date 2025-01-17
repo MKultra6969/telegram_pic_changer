@@ -26,3 +26,5 @@ USER_SESSION_NAME = "my_account" # Change name if needed
 
 
 # Made by MKultra69, with love
+
+# Саня, ты педик
