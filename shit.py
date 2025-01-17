@@ -343,3 +343,5 @@ if __name__ == "__main__":
 # Sanya ti pedic
 # Made by MKultra69
 # GFY
+
+# Какие то из комментов специально добавлены с помощью ИИ
