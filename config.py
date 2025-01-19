@@ -1,29 +1,29 @@
-# config.py
-
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # API & Tokens
-API_ID = 0 # pick it on https://my.telegram.org/auth
-API_HASH = "Your Hash" # Pick it on https://my.telegram.org/auth
-BOT_TOKEN = "YOUR TOKEN" # Pick it in bot father
-ADMIN_ID = 1745935544  # ID of your TG account for admin permissions in bot
+API_ID = int(os.getenv("API_ID", 0))  # Значение по умолчанию 0
+API_HASH = os.getenv("API_HASH", "0")  # Значение по умолчанию "0"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "0")  # Значение по умолчанию "0"
+ADMIN_ID = int(os.getenv("ADMIN_ID", 1745935544))  # Значение по умолчанию 1745935544
 
 # Directories
-SAVE_DIR = "avatars" # Change if needed
-LOG_DIR = "logs" # Change if needed
+SAVE_DIR = os.getenv("SAVE_DIR", "pictures")  # Значение по умолчанию "pictures"
+LOG_DIR = os.getenv("LOG_DIR", "logs")  # Значение по умолчанию "logs"
 
 # Logging
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
 
 current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-LOG_FILENAME = os.path.join(LOG_DIR, f'avatar_bot-{current_time}.log') # You can also change the name of the log file by changing 'avatar_bot'
+LOG_FILENAME = os.path.join(LOG_DIR, f'KAKASHKI-{current_time}.log')  # Можно изменить имя файла логов
 
 # Pyrogram sessions
-BOT_SESSION_NAME = "avatar_bot" # Change name if needed
-USER_SESSION_NAME = "my_account" # Change name if needed
-
+BOT_SESSION_NAME = os.getenv("BOT_SESSION_NAME", "Bot")  # Значение по умолчанию "Bot"
+USER_SESSION_NAME = os.getenv("USER_SESSION_NAME", "User")  # Значение по умолчанию "User"
 
 # Made by MKultra69, with love
 

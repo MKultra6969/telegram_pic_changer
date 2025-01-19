@@ -2,9 +2,10 @@ import logging
 import os
 import time
 import json
+from moviepy.video.io.VideoFileClip import VideoFileClip
+from PIL import Image
 from pyrogram import Client, filters
 from datetime import timedelta
-from datetime import datetime
 from config import API_ID, API_HASH, BOT_TOKEN, ADMIN_ID, SAVE_DIR, LOG_DIR, LOG_FILENAME, BOT_SESSION_NAME, USER_SESSION_NAME
 
 BAN_LIST_FILE = "ban_list.json"
@@ -77,10 +78,10 @@ banned_users = set()  # Множество забаненных пользова
 
 def get_next_filename():
     """Определяет имя следующего файла с аватаркой."""
-    existing_files = os.listdir(SAVE_DIR)
+    existing_files = [f for f in os.listdir(SAVE_DIR) if f.startswith("pic") and f.endswith(".jpg")]
     nums = [
         int(f.replace("pic", "").replace(".jpg", ""))
-        for f in existing_files if f.startswith("pic") and f.endswith(".jpg")
+        for f in existing_files if f[3:-4].isdigit()
     ]
     next_num = max(nums, default=0) + 1
     return os.path.join(SAVE_DIR, f"pic{next_num}.jpg")
@@ -98,9 +99,32 @@ def parse_timeout(timeout_str):
         return timedelta(days=int(timeout_str[:-1]))
     return None
 
+def process_video(file_path):
+    """Обрабатывает видео или GIF, чтобы оно соответствовало требованиям Telegram."""
+    try:
+        video = VideoFileClip(file_path)
 
-@bot.on_message(filters.private & filters.photo)
-async def handle_photo(client, message):
+        # Ограничиваем длительность
+        if video.duration > 10:
+            video = video.subclipped(0, 10)
+
+        # Ограничиваем разрешение
+        video = video.resize(height=640, width=640)  # Указываем только высоту для сохранения пропорций.
+
+        # Убираем звук
+        output_path = file_path.replace(".mp4", "_processed.mp4")
+        video.write_videofile(output_path, codec="libx264", audio=False)
+
+        return output_path
+    except Exception as e:
+        logging.error(f"Ошибка при обработке видео: {e}")
+        return None
+    finally:
+        video.close()  # Закрываем объект VideoFileClip
+
+
+@bot.on_message(filters.private & (filters.photo | filters.video | filters.animation))
+async def handle_media(client, message):
     user_id = message.from_user.id
     username = message.from_user.username or "без имени"
 
@@ -127,10 +151,31 @@ async def handle_photo(client, message):
         logging.info(f"Попытка смены аватарки от @{username} (ID: {user_id}), тайм-аут не прошел.")
         return
 
-    # Скачиваем фото с нумерацией
+    # Определяем, какой тип медиа был отправлен
     file_path = get_next_filename()
-    await bot.download_media(message.photo.file_id, file_name=file_path)
-    logging.info(f"Фото сохранено: {file_path}")
+
+    if message.photo:
+        file_id = message.photo.file_id
+        await bot.download_media(file_id, file_name=file_path)
+    elif message.video:
+        file_id = message.video.file_id
+        await bot.download_media(file_id, file_name=file_path)
+        file_path = process_video(file_path)
+        if not file_path:
+            await message.reply("Не удалось обработать видео.")
+            return
+    elif message.animation:
+        file_id = message.animation.file_id
+        await bot.download_media(file_id, file_name=file_path)
+        file_path = process_video(file_path)
+        if not file_path:
+            await message.reply("Не удалось обработать GIF.")
+            return
+    else:
+        await message.reply("Тип медиа не поддерживается для смены аватарки.")
+        return
+
+    logging.info(f"Медиа сохранено: {file_path}")
 
     # Меняем аватарку
     try:
@@ -152,6 +197,7 @@ async def start_message(client, message):
     await message.reply(welcome_text)
     username = message.from_user.username or "без имени"
     logging.info(f"Юзер нажал START в боте @{username} id: {message.from_user.id}")
+
 
 
 @bot.on_message(filters.command("timeout"))
@@ -345,3 +391,19 @@ if __name__ == "__main__":
 # GFY
 
 # Какие то из комментов специально добавлены с помощью ИИ
+
+# UPD 01/19/25 - я выкурил примерно 27 сигарет за все время написания этого говна
+# UPD 01/19/25 10:05 - я выкурил уже, вероятно, более пачки...
+
+# +═════════════════════════════════════════════════════════════════════════+
+# ║      ███▄ ▄███▓ ██ ▄█▀ █    ██  ██▓    ▄▄▄█████▓ ██▀███   ▄▄▄           ║
+# ║     ▓██▒▀█▀ ██▒ ██▄█▒  ██  ▓██▒▓██▒    ▓  ██▒ ▓▒▓██ ▒ ██▒▒████▄         ║
+# ║     ▓██    ▓██░▓███▄░ ▓██  ▒██░▒██░    ▒ ▓██░ ▒░▓██ ░▄█ ▒▒██  ▀█▄       ║
+# ║     ▒██    ▒██ ▓██ █▄ ▓▓█  ░██░▒██░    ░ ▓██▓ ░ ▒██▀▀█▄  ░██▄▄▄▄██      ║
+# ║     ▒██▒   ░██▒▒██▒ █▄▒▒█████▓ ░██████▒  ▒██▒ ░ ░██▓ ▒██▒ ▓█   ▓██▒     ║
+# ║     ░ ▒░   ░  ░▒ ▒▒ ▓▒░▒▓▒ ▒ ▒ ░ ▒░▓  ░  ▒ ░░   ░ ▒▓ ░▒▓░ ▒▒   ▓▒█░     ║
+# ║     ░  ░      ░░ ░▒ ▒░░░▒░ ░ ░ ░ ░ ▒  ░    ░      ░▒ ░ ▒░  ▒   ▒▒ ░     ║
+# ║     ░      ░   ░ ░░ ░  ░░░ ░ ░   ░ ░     ░        ░░   ░   ░   ▒        ║
+# ║            ░   ░  ░      ░         ░  ░            ░           ░  ░     ║
+# ║                                  by                                     ║
+# +═════════════════════════════════════════════════════════════════════════+
