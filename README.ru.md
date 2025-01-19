@@ -1,5 +1,7 @@
 [🇺🇸English](https://github.com/MKultra6969/telegram_pic_changer/blob/main/README.md)
 
+# ‼️Неактуально для новой версии. Исправлю позже‼️
+
 # **Profile pic changer Bot**
 
 ## **Описание**
