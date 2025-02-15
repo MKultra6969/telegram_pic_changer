@@ -59,12 +59,15 @@ This **bot** is your solution for changing profile pictures in **Telegram**. Jus
 ## **Commands**
 
 - **/start** — Start the bot, and log when someone triggers it. 💬
-- **/timeout <time>** — Global timeout for profile pic changes (e.g., `/timeout 1h`). ⏳
-- **/timeout_user @username <time>** — Timeout for a specific user. ⏳
+- **/timeout <time>** — Set a global timeout for profile pic changes (e.g., `/timeout 1h`). ⏳
+- **/timeout_user @username <time>** — Set a timeout for a specific user. ⏳
 - **/stop_spam** — Disable profile pic changes for everyone. 🔒
 - **/start_spam** — Enable profile pic changes for everyone. 🔓
 - **/ban_user @username** — Ban a user from changing profile pics. 🚫
 - **/unban_user @username** — Unban a user, allowing them to change profile pics. 🔓
+- **/logs** — Retrieve logs via inline buttons. 📄
+- **/images** — Send a ZIP archive of all saved profile pictures. 📦
+- **/help** — Display a list of all admin commands. ℹ️
 
 ## **Notes**
 
